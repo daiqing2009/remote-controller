@@ -2,7 +2,7 @@
 // @name         enable physical remote controller to control Heimao TV
 // @namespace    http://your-namespace.com/
 // @updateURL    https://raw.githubusercontent.com/daiqing2009/remote-controller/main/heimaotv.user.js
-// @version      0.2.2
+// @version      0.3.0
 // @description  Custom key navigation for Heimao TV
 // @match        https://heimaotv.vip/*
 // @grant        none
@@ -25,59 +25,9 @@
             e.preventDefault();
         });
     }else if (isPlayerPage) {
-        let currentTab = 'anthology-tab';
-        let currentSlideIndex = 0;
-        let currentAnthologyIndex = 0;
-
-        function updateFocus() {
-            $('.episode-focus').removeClass('episode-focus');
-            if (currentTab === 'anthology-tab') {
-                $('.vod-playerUrl.swiper-slide').eq(currentSlideIndex).addClass('episode-focus');
-            } else {
-                $('.anthology-list-play li').eq(currentAnthologyIndex).addClass('episode-focus');
-            }
-        }
-
-        $(document).on('keydown', function(e) {
-            console.log(e.which)
-            switch(e.which) {
-                case 38: // Up arrow
-                case 40: // Down arrow
-                    currentTab = (currentTab === 'anthology-tab') ? 'anthology-list' : 'anthology-tab';
-                    break;
-                case 37: // Left arrow
-                    if (currentTab === 'anthology-tab') {
-                        currentSlideIndex = (currentSlideIndex - 1 + $('.vod-playerUrl .swiper-slide').length) % $('.vod-playerUrl .swiper-slide').length;
-                    } else {
-                        currentAnthologyIndex = (currentAnthologyIndex - 1 + $('.anthology-list-play li').length) % $('.anthology-list-play li').length;
-                    }
-                    break;
-                case 39: // Right arrow
-                    if (currentTab === 'anthology-tab') {
-                        currentSlideIndex = (currentSlideIndex + 1) % $('.vod-playerUrl .swiper-slide').length;
-                    } else {
-                        currentAnthologyIndex = (currentAnthologyIndex + 1) % $('.anthology-list-play li').length;
-                    }
-                    break;
-                case 13: // Enter key
-                    if (currentTab === 'anthology-tab') {
-                        $('.vod-playerUrl .swiper-slide').eq(currentSlideIndex).click();
-                    } else {
-                        window.location.href = $('.anthology-list-play li.episode-focus a').attr('href');
-                    }
-                    break;
-                case 179: // Play or Pause
-                    $('.art-control-playAndPause .art-icon-play').click()
-                    //$('.art-control-playAndPause .art-icon-pause').click()
-                    break;
-                default:
-                    return;
-            }
-            e.preventDefault();
-            updateFocus();
-        });
-
-        $('<style>')
+        let columns = 0;
+        function init() {
+            $('<style>')
             .prop('type', 'text/css')
             .html(`
                 .episode-focus {
@@ -86,8 +36,55 @@
                 }
             `)
             .appendTo('head');
+            columns = calculateColumns();
+        }
 
-        updateFocus();
+        function updateFocus(index) {
+            $('.episode-focus').removeClass('episode-focus');
+            $('.anthology-list-play li').eq(index).addClass('episode-focus');
+        }
+
+        $(document).on('keydown', function(event) {
+            event.preventDefault();
+            console.log(event.key)
+            len = $('.anthology-list-play li').length
+            switch (event.key) {
+                case 'ArrowDown':
+                    index = Math.min(index + columns, len -1);
+                    updateFocus(index);
+                    break;
+                case 'ArrowUp':
+                    index = Math.max(index - columns, 0);
+                    updateFocus(index);
+                    break;
+                case 'ArrowRight':
+                    index = Math.min(index + 1, len -1);
+                    updateFocus(index);
+                    break;
+                case 'ArrowLeft':
+                    index = Math.max(index - 1, 0);
+                    updateFocus(index);
+                    break;
+                case 'Enter':
+                    window.location.href = $('.anthology-list-play li.episode-focus a').attr('href');
+                    break;
+                case 'Play':
+                    $('.art-control-playAndPause .art-icon-play').click()
+                    break;
+                case 'Pause':
+                    $('.art-control-playAndPause .art-icon-pause').click()
+                    break;
+            }           
+        });
+
+        function calculateColumns() {
+            const maxWidth = 1024;
+            const windowWidth = Math.min($('anthology-list-box none dx').width(), maxWidth);
+            const divWidth =$('anthology-list-play li.box:first').outerWidth();
+            return Math.floor(windowWidth / divWidth);
+        }
+
+        $(document).ready(init);
     }else {
         let index = 0;
         let columns = 4;
