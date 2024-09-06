@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         enable physical remote controller to control Heimao TV
 // @namespace    http://your-namespace.com/
-// @version      0.21
+// @updateURL    https://raw.githubusercontent.com/daiqing2009/remote-controller/main/heimaotv.user.js
+// @version      0.22
 // @description  Custom key navigation for Heimao TV
 // @match        https://heimaotv.vip/*
 // @grant        none
