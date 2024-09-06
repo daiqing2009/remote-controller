@@ -2,7 +2,7 @@
 // @name         enable physical remote controller to control Heimao TV
 // @namespace    http://your-namespace.com/
 // @updateURL    https://raw.githubusercontent.com/daiqing2009/remote-controller/main/heimaotv.user.js
-// @version      0.3.2
+// @version      0.4
 // @description  Custom key navigation for Heimao TV
 // @match        https://heimaotv.vip/*
 // @grant        none
@@ -108,17 +108,20 @@
             `)
                 .appendTo('head');
             columns = calculateColumns();
+            console.log(`Window inited, columns: ${columns}`);
         }
 
         function focusDiv(index){
             $('.public-list-div').removeClass('box-focus');
             $('.public-list-div').eq(index).addClass('box-focus')
+            scrollToFocusedDiv();
         }
 
         $(document).on('keydown', (event) => {
             event.preventDefault();
+            console.log(`key${event.key} down`);
             let len = $('.public-list-div').length
-            console.log(event.key)
+            console.log(`current index= ${index} of length=${len}`);
             switch (event.key) {
                 case 'ArrowDown':
                     index = Math.min(index + columns, len -1);
@@ -142,6 +145,22 @@
             }
         });
 
+        function scrollToFocusedDiv() {
+            var $focusedDiv = $('.public-list-div.box-focus');
+            if ($focusedDiv.length) {
+                $focusedDiv.attr('tabindex', '-1'); // Make sure it's focusable
+                $focusedDiv.focus({preventScroll: true}); // Focus without scrolling
+                $('html, body').animate({
+                    scrollTop: $focusedDiv.offset().top - ($(window).height() / 2) + ($focusedDiv.outerHeight() / 2)
+                }, 500, function() {
+                    // Callback after animation
+                    if (!$focusedDiv.is(':focus')) {
+                        $focusedDiv.focus();
+                    }
+                });
+            }
+        }
+
         function calculateColumns() {
             const maxWidth = 2048;
             const windowWidth = Math.min($(window).width(), maxWidth);
@@ -153,6 +172,7 @@
             columns = calculateColumns();
             console.log(`Window resized. Recalculated columns: ${columns}`);
         });
+
 
         $(document).ready(init);
     }
