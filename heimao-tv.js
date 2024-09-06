@@ -1,11 +1,9 @@
 // ==UserScript==
 // @name         enable physical remote controller to control Heimao TV
 // @namespace    http://your-namespace.com/
-// @version      0.2
+// @version      0.21
 // @description  Custom key navigation for Heimao TV
-// @match        https://heimaotv.vip/vodshow-*.html
-// @match        https://heimaotv.vip/voddetail-*.html
-// @match        https://heimaotv.vip/vodplay-*.html
+// @match        https://heimaotv.vip/*
 // @grant        none
 // @require      https://code.jquery.com/jquery-3.6.0.min.js
 // ==/UserScript==
@@ -150,7 +148,6 @@
             console.log(`Window resized. Recalculated columns: ${columns}`);
         });
 
-        // Initialize when the document is ready
         $(document).ready(init);
     }
 
