@@ -2,7 +2,7 @@
 // @name         enable physical remote controller to control Heimao TV
 // @namespace    http://your-namespace.com/
 // @updateURL    https://raw.githubusercontent.com/daiqing2009/remote-controller/main/heimaotv.user.js
-// @version      0.3.0
+// @version      0.3.2
 // @description  Custom key navigation for Heimao TV
 // @match        https://heimaotv.vip/*
 // @grant        none
@@ -25,6 +25,7 @@
             e.preventDefault();
         });
     }else if (isPlayerPage) {
+        let index = 0;
         let columns = 0;
         function init() {
             $('<style>')
@@ -37,17 +38,19 @@
             `)
             .appendTo('head');
             columns = calculateColumns();
+            console.log(`Window inited, columns: ${columns}`);
         }
 
         function updateFocus(index) {
-            $('.episode-focus').removeClass('episode-focus');
-            $('.anthology-list-play li').eq(index).addClass('episode-focus');
+            $('.dx .anthology-list-play li').removeClass('episode-focus');
+            $('.dx .anthology-list-play li').eq(index).addClass('episode-focus');
         }
 
         $(document).on('keydown', function(event) {
             event.preventDefault();
-            console.log(event.key)
-            len = $('.anthology-list-play li').length
+            console.log(`key${event.key} down`);
+            let len = $('.anthology-list-play li').length;
+            console.log(`current index= ${index} of length=${len}`);
             switch (event.key) {
                 case 'ArrowDown':
                     index = Math.min(index + columns, len -1);
@@ -66,7 +69,7 @@
                     updateFocus(index);
                     break;
                 case 'Enter':
-                    window.location.href = $('.anthology-list-play li.episode-focus a').attr('href');
+                    window.location.href = $('.dx .anthology-list-play li.episode-focus a').attr('href');
                     break;
                 case 'Play':
                     $('.art-control-playAndPause .art-icon-play').click()
@@ -74,15 +77,20 @@
                 case 'Pause':
                     $('.art-control-playAndPause .art-icon-pause').click()
                     break;
-            }           
+            }
         });
 
         function calculateColumns() {
             const maxWidth = 1024;
-            const windowWidth = Math.min($('anthology-list-box none dx').width(), maxWidth);
-            const divWidth =$('anthology-list-play li.box:first').outerWidth();
+            const windowWidth = Math.min($('ul.anthology-list-play').innerWidth(), maxWidth);
+            const divWidth =$('li.box.border').outerWidth();
             return Math.floor(windowWidth / divWidth);
         }
+
+        $(window).on('resize', () => {
+            columns = calculateColumns();
+            console.log(`Window resized. Recalculated columns: ${columns}`);
+        });
 
         $(document).ready(init);
     }else {
